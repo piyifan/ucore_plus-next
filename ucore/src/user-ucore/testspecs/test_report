@@ -1,0 +1,20 @@
+test_mutex.testspec is used to test the correctness of mutex by test standard mutexes,error-check mutex and recursive mutex. It expects "ok" if all above tests are passed.And can be used by following steps:
+
+cd ~/ucore_plus/ucore 
+make ARCH=arm BOARD=goldfishv7 defconfig
+make sfsimg
+make kernel
+./uCore_test -s bionic -w 15 -t 45 -f src/user-ucore/testspecs/test_mutex.testspec
+
+
+
+
+test_getaddrinfo  is used to try to get addrinfo from "www.android.com:9999" ,at first without the hints and then with the hints.It is passed if no errors occured.It can be used by following steps:
+
+cd ~/ucore_plus/ucore 
+make ARCH=arm BOARD=goldfishv7 defconfig
+make sfsimg
+make kernel
+./uCore_test -s bionic -w 15 -t 45 -f src/user-ucore/testspecs/test_getaddrinfo.testspec
+
+Now there is something wrong with the test,when calling getaddrinfo,an undefined syscall error is thrown because the related works still remain to be done.

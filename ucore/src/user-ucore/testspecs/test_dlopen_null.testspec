@@ -1,0 +1,4 @@
+@program /bionic-test/test_dlopen_null
+
+! 'Could not open self-executable with dlopen(NULL) !!'
+! 'Could not lookup symbol inside executable !!'

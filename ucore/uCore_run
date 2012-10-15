@@ -2,6 +2,8 @@
 
 BUILD_DIR=obj
 TEST_MODE=
+NETWORK_MODE=
+MACADDR=11:11:11:11:11:11
 
 while getopts "hd:t" opt; do
     case $opt in
@@ -15,6 +17,7 @@ while getopts "hd:t" opt; do
             echo "                                 default to obj/"
             echo "  -t                             run in background for test"
             echo "                                 i.e. do not use stdio or open SDL window"
+            echo "  -n <mac_addr>                  enable networking device simulation"
             echo ""
             echo "Supported architectures: i386, arm(goldfishv7)"
             echo ""
@@ -23,6 +26,12 @@ while getopts "hd:t" opt; do
             ;;
         t)
             TEST_MODE=y
+            ;;
+        n)
+            NETWORK_MODE=y
+            if [[ ! $OPTARG = "" ]]; then 
+                MACADDR=$OPTARG
+            fi
             ;;
         ?)
             exit 1
@@ -69,15 +78,20 @@ case $UCONFIG_ARCH in
             QEMU=qemu-system-i386
         fi
         if [[ $TEST_MODE = y ]]; then
-            EXTRA_OPT="-S -display none"
+            DISPLAY_OPT="-S -display none"
         else
-            EXTRA_OPT="-monitor stdio"
+            DISPLAY_OPT="-serial mon:stdio"
+        fi
+        if [[ $NETWORK_MODE = y ]]; then
+            NETWORK_OPT=" -device i82559er,netdev=mynet0,macaddr=$MACADDR \
+                         -netdev user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9"
         fi
         exec $QEMU -m 128 \
             -hda $BUILD_DIR/kernel.img \
             -drive file=$BUILD_DIR/swap.img,media=disk,cache=writeback \
             -drive file=$BUILD_DIR/sfs.img,media=disk,cache=writeback \
+            $DISPLAY_OPT \
             -s -serial file:$BUILD_DIR/serial.log \
-            $EXTRA_OPT
+            $NETWORK_OPT
         ;;
 esac

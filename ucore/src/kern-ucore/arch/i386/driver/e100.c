@@ -5,15 +5,15 @@
 #include <e100.h>
 #include <proc.h>
 #include <picirq.h>
-#include <lwip/ip_addr.h>
-#include <lwip/ip.h>
-#include <lwip/netif.h>
-#include <netif/e100if.h>
+//#include <lwip/ip_addr.h>
+//#include <lwip/ip.h>
+//#include <lwip/netif.h>
+//#include <netif/e100if.h>
+//#include <netif/etharp.h>
 #include <slab.h>
 #include <string.h>
 #include <sched.h>
 #include <pmm.h>
-#include <netif/etharp.h>
 
 //#define E100_DEBUG    1
 

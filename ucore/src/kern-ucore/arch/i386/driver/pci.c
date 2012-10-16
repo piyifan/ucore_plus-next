@@ -1,5 +1,7 @@
-#include <e100.h>
+#include <e100.h> 	
 //#include <e1000.h>
+/// deleted by huangs, pci driver should seperate from devices
+
 #include <pcireg.h>
 #include <arch.h>
 #include <assert.h>

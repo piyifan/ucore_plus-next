@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "Executing /etc/qemu-ifup"
+echo "Bringing up tap0 for bridge mode ..."
+echo sudo /sbin/ifconfig tap0 192.168.1.12 up
+/sbin/ifconfig tap0 192.168.1.12 up
+echo $?
+echo "Adding tap0 to br0 ..."
+echo sudo /usr/sbin/brctl addif br0 tap0
+echo $?
+sleep 2
+

@@ -1058,6 +1058,7 @@ etharp_raw(struct netif *netif, const struct eth_addr *ethsrc_addr,
   const u8_t * ethdst_hwaddr;
 #endif /* LWIP_AUTOIP */
 
+    LWIP_DEBUGF(ETHARP_DEBUG , ("etharp_raw: pbuf_alloc\n"));
   /* allocate a pbuf for the outgoing ARP request packet */
   p = pbuf_alloc(PBUF_RAW, SIZEOF_ETHARP_PACKET, PBUF_RAM);
   /* could allocate a pbuf for an ARP request? */

@@ -20,6 +20,9 @@
 #include <nios2.h>
 #include <io.h>
 #include <rf212.h>
+#include <lwip/netif.h>
+#include <netif/rf212.h>
+#include <netif/etharp.h>
 
 #define RF212_BASE (RF212_0_BASE + 0xE0000000)
 
@@ -54,6 +57,8 @@ void rf212_int_handler()
 	*/
 }
 
+static struct netif rf212_netif;
+
 void rf212_init()
 {
 	kprintf("rf212_init!\n");
@@ -66,6 +71,46 @@ void rf212_init()
 	} while (!(status & 0x4));
 	
 	alt_irq_enable(RF212_0_IRQ);
+
+	// attach to lwip
+
+  /* set MAC hardware address length */
+  rf212_netif.hwaddr_len = 6;
+
+  /* set MAC hardware address */
+  rf212_netif.hwaddr[0] = 0x52;
+  rf212_netif.hwaddr[1] = 0x54;
+  rf212_netif.hwaddr[2] = 0x00;
+  rf212_netif.hwaddr[3] = 0x12;
+  rf212_netif.hwaddr[4] = 0x34;
+  rf212_netif.hwaddr[5] = 0x56;
+
+    kprintf("   MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            rf212_netif.hwaddr[0],
+            rf212_netif.hwaddr[1],
+            rf212_netif.hwaddr[2],
+            rf212_netif.hwaddr[3],
+            rf212_netif.hwaddr[4],
+            rf212_netif.hwaddr[5]);
+
+  rf212_netif.mtu = 125;
+
+
+  /* set IP Address */
+    struct ip_addr ipaddr;
+    IP4_ADDR(&ipaddr, 192, 168, 1, 13);
+    struct ip_addr netmask;
+    IP4_ADDR(&netmask, 255, 255, 255, 0);
+    struct ip_addr gw;
+    IP4_ADDR(&gw, 192, 168, 1, 1);
+
+    netif_add(&rf212_netif, &ipaddr, &netmask, &gw, 0, ethernetif_init, ethernet_input);
+    netif_set_up(&rf212_netif);
+    struct ethernetif *eif = rf212_netif.state;
+    eif->recv = NULL; /// TODO: receive buffer
+    eif->send = rf212_send;
+    eif->ethaddr = (struct eth_addr *)&rf212_netif.hwaddr;
+
 }
 
 void rf212_send(uint8_t len, uint8_t *data)

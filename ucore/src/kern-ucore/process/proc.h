@@ -12,6 +12,7 @@
 #include <elf.h>
 #include <arch_proc.h>
 #include <signal.h>
+#include <lwip/sys.h>
 
 // process's state in his life cycle
 enum proc_state {
@@ -65,6 +66,7 @@ struct proc_struct {
   sem_queue_t *sem_queue;                     // the user semaphore queue which process waits
   event_t event_box;                          // the event which process waits   
   struct fs_struct *fs_struct;                // the file related info(pwd, files_count, files_array, fs_semaphore) of process
+  struct sys_timeouts *lwip_timeouts;           // the timeout info ( used by lwip )
 
   struct proc_signal signal_info;
 

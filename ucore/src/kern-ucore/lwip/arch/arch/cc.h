@@ -32,7 +32,7 @@ typedef unsigned int mem_ptr_t;
 #define DBG_OFF 0x00
 
 #define LWIP_PLATFORM_DEBUG(x)  kprintf(x)
-#define LWIP_PLATFORM_DIAG(x)  kprintf( #x )
+#define LWIP_PLATFORM_DIAG(x)  kprintf x 
 #define LWIP_PLATFORM_ASSERT(x) assert(x)
 
 #endif // UCORE_LWIP_CC_H_

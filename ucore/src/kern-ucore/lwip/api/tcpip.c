@@ -263,7 +263,7 @@ tcpip_thread(void *arg)
   if (tcpip_init_done != NULL) {
     tcpip_init_done(tcpip_init_done_arg);
   }
-      LWIP_DEBUGF(TCPIP_DEBUG, "tcpip init done\n");
+      LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip init done\n") );
 
   LOCK_TCPIP_CORE();
   while (1) {                          /* MAIN Loop */

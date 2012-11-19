@@ -43,7 +43,7 @@ extern "C" {
 typedef enum {
 #define LWIP_MEMPOOL(name,num,size,desc)  MEMP_##name,
 #include "lwip/memp_std.h"
-  MEMP_MAX = 20
+  MEMP_MAX = 2
 } memp_t;
 
 #if MEM_USE_POOLS

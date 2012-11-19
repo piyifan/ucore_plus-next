@@ -293,7 +293,6 @@ memp_init(void)
   LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: memp_sizes[i] = %d\n", memp_sizes[i]));
 #if MEMP_OVERFLOW_CHECK
   LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: MEMP_SANITY_REGION_AFTER_ALIGNED = %d\n", MEMP_SANITY_REGION_AFTER_ALIGNED));
-        + 
 #endif
     }
   }

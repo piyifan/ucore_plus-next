@@ -48,7 +48,7 @@ int alt_main(void)
     
     //rf212_init();               // enable rf212 wireless driver
 
-    tcpip_init(0, 0);           // init lwip
+    //tcpip_init(0, 0);           // init lwip
     
     cons_init();                // init the console, should be after irq_int()!
     

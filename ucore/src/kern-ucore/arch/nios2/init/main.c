@@ -46,7 +46,7 @@ int alt_main(void)
 
     irq_init();                 // enable irq interrupt
     
-    //rf212_init();               // enable rf212 wireless driver
+    rf212_init();               // enable rf212 wireless driver
 
     //tcpip_init(0, 0);           // init lwip
     

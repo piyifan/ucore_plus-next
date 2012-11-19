@@ -24,6 +24,8 @@
 #include <netif/rf212.h>
 #include <netif/etharp.h>
 
+#define RF212_DEBUG 1
+
 #define RF212_BASE (RF212_0_BASE + 0xE0000000)
 
 void rf212_int_handler()
@@ -104,12 +106,24 @@ void rf212_init()
     struct ip_addr gw;
     IP4_ADDR(&gw, 192, 168, 1, 1);
 
+    #if RF212_DEBUG
+    kprintf("netif_add\n");
+    #endif
     netif_add(&rf212_netif, &ipaddr, &netmask, &gw, 0, ethernetif_init, ethernet_input);
+    #if RF212_DEBUG
+    kprintf("netif_set_up\n");
+    #endif
     netif_set_up(&rf212_netif);
+    #if RF212_DEBUG
+    kprintf("set ethernetif\n");
+    #endif
     struct ethernetif *eif = rf212_netif.state;
     eif->recv = NULL; /// TODO: receive buffer
     eif->send = rf212_send;
     eif->ethaddr = (struct eth_addr *)&rf212_netif.hwaddr;
+    #if RF212_DEBUG
+    kprintf("rf212 init complete\n");
+    #endif
 
 }
 

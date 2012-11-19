@@ -137,13 +137,13 @@ try_down(semaphore_t *sem) {
     return ret;
 }
 
-static int
+int
 usem_up(semaphore_t *sem) {
     __up(sem, WT_USEM);
     return 0;
 }
 
-static int
+int
 usem_down(semaphore_t *sem, unsigned int timeout) {
     unsigned long saved_ticks;
     timer_t __timer, *timer = ipc_timer_init(timeout, &saved_ticks, &__timer);

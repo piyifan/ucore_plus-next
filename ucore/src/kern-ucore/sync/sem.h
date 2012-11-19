@@ -46,6 +46,9 @@ void up(semaphore_t *sem);
 void down(semaphore_t *sem);
 bool try_down(semaphore_t *sem);
 
+int usem_up(semaphore_t *sem);
+int usem_down(semaphore_t *sem, unsigned int timeout);
+
 sem_undo_t *semu_create(semaphore_t *sem, int value);
 void semu_destroy(sem_undo_t *semu);
 

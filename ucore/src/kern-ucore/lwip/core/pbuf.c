@@ -185,6 +185,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
   u16_t offset;
   s32_t rem_len; /* remaining length */
   LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_alloc(length=%"U16_F")\n", length));
+  LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_alloc begin\n"));
 
   /* determine header offset */
   offset = 0;

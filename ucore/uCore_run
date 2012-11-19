@@ -2,8 +2,13 @@
 
 BUILD_DIR=obj
 TEST_MODE=
+NETWORK_MODE=
+LISTEN_MODE=
+GDB_OPT=
+SOCKET_PORT=3456
+MACADDR=11:11:11:11:11:11
 
-while getopts "hd:t" opt; do
+while getopts "hd:t:n:l:c" opt; do
     case $opt in
         d)
             BUILD_DIR=$OPTARG
@@ -15,6 +20,10 @@ while getopts "hd:t" opt; do
             echo "                                 default to obj/"
             echo "  -t                             run in background for test"
             echo "                                 i.e. do not use stdio or open SDL window"
+            echo "  -n <mac_addr>                  enable networking device simulation"
+            echo "  -l <port>                      listen at <port>"
+            echo "  -c <port>                      connect to <port>"
+            echo "  -s                             gdb debug on"
             echo ""
             echo "Supported architectures: i386, arm(goldfishv7)"
             echo ""
@@ -23,6 +32,28 @@ while getopts "hd:t" opt; do
             ;;
         t)
             TEST_MODE=y
+            ;;
+        n)
+            NETWORK_MODE=y
+            if [[ ! $OPTARG = "" ]]; then 
+                MACADDR=$OPTARG
+            fi
+            ;;
+        l)
+            LISTEN_MODE=y
+            if [[ ! $OPTARG = "" ]]; then 
+                SOCKET_PORT=$OPTARG
+            fi
+            =$OPTARG
+            ;;
+        s)
+            GDB_ON="-s "
+            ;;
+        c)
+            LISTEN_MODE=n
+            if [[ ! $OPTARG = "" ]]; then 
+                SOCKET_PORT=$OPTARG
+            fi
             ;;
         ?)
             exit 1
@@ -69,15 +100,27 @@ case $UCONFIG_ARCH in
             QEMU=qemu-system-i386
         fi
         if [[ $TEST_MODE = y ]]; then
-            EXTRA_OPT="-S -display none"
+            DISPLAY_OPT="-S -display none"
         else
-            EXTRA_OPT="-monitor stdio"
+            DISPLAY_OPT="-serial mon:stdio"
         fi
+        if [[ $NETWORK_MODE = y ]]; then
+            if [[ $LISTEN_MODE = y ]]; then
+                NETWORK_OPT="-net nic,model=i82559er \
+                             -net tap,script=etc/qemu-ifup,downscript=etc/qemu-ifdown -net socket,listen=localhost:$SOCKET_PORT"
+            else
+                NETWORK_OPT="-net nic,macaddr=$MACADDR,model=i82559er \
+                             -net socket,connect=localhost:$SOCKET_PORT"
+            fi 
+        fi
+        echo $NETWORK_OPT
         exec $QEMU -m 128 \
             -hda $BUILD_DIR/kernel.img \
             -drive file=$BUILD_DIR/swap.img,media=disk,cache=writeback \
             -drive file=$BUILD_DIR/sfs.img,media=disk,cache=writeback \
-            -s -serial file:$BUILD_DIR/serial.log \
-            $EXTRA_OPT
+            $DISPLAY_OPT \
+            -serial file:$BUILD_DIR/serial.log \
+            $GDB_OPT \
+            $NETWORK_OPT
         ;;
 esac

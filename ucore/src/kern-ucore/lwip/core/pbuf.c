@@ -185,9 +185,9 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
   u16_t offset;
   s32_t rem_len; /* remaining length */
   LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_alloc(length=%"U16_F")\n", length));
-  LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_alloc begin\n"));
 
   /* determine header offset */
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: switch layer\n"));
   offset = 0;
   switch (layer) {
   case PBUF_TRANSPORT:
@@ -209,9 +209,11 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
     return NULL;
   }
 
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: switch type\n"));
   switch (type) {
   case PBUF_POOL:
     /* allocate head of pbuf chain into p */
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: PBUF_POOL , memp_malloc\n"));
     p = memp_malloc(MEMP_PBUF_POOL);
     LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_alloc: allocated pbuf %p\n", (void *)p));
     if (p == NULL) {

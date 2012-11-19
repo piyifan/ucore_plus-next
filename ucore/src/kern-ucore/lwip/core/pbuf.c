@@ -289,6 +289,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
       return NULL;
     }
     /* Set up internal structure of the pbuf. */
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: Set up internal structure of the pbuf.\n"));
     p->payload = LWIP_MEM_ALIGN((void *)((u8_t *)p + SIZEOF_STRUCT_PBUF + offset));
     p->len = p->tot_len = length;
     p->next = NULL;

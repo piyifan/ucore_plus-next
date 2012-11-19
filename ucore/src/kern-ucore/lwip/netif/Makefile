@@ -1,1 +1,1 @@
-obj-y := rf212if.o etharp.o
+obj-y := rf212if.o etharp.o e100if.o

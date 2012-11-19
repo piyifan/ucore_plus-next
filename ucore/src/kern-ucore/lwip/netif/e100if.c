@@ -37,6 +37,8 @@
  * something that better describes your network interface.
  */
 
+#if 0
+
 #include <lwip/opt.h>
 #include <lwip/def.h>
 #include <lwip/mem.h>
@@ -132,9 +134,11 @@ low_level_output(struct netif *netif, struct pbuf *p)
 //  signal that packet should be sent();
   
   LINK_STATS_INC(link.xmit);
-/*#ifdef LINK_STATS
+/*
+#ifdef LINK_STATS
   lwip_stats.link.xmit++;
-#endif*/ /* LINK_STATS */      
+#endif
+*/ /* LINK_STATS */      
 
   return ERR_OK;
 }
@@ -324,4 +328,6 @@ ethernetif_init(struct netif *netif)
 
   return ERR_OK;
 }
+
+#endif
 

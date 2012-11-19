@@ -1071,6 +1071,7 @@ etharp_raw(struct netif *netif, const struct eth_addr *ethsrc_addr,
   LWIP_ASSERT("check that first pbuf can hold struct etharp_hdr",
               (p->len >= SIZEOF_ETHARP_PACKET));
 
+    LWIP_DEBUGF(ETHARP_DEBUG , ("etharp_raw: get hdr\n"));
   ethhdr = p->payload;
   hdr = (struct etharp_hdr *)((u8_t*)ethhdr + SIZEOF_ETH_HDR);
   LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_raw: sending raw ARP packet.\n"));

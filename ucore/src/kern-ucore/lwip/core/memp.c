@@ -285,12 +285,13 @@ memp_init(void)
         + MEMP_SANITY_REGION_AFTER_ALIGNED
 #endif
       );
-  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: alloc a memp elements\n"));
-  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: SIZE = %d\n", MEMP_SIZE + memp_sizes[i]
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: alloc a memp element\n"));
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: SIZE = %d\n", MEMP_SIZE + memp_sizes[i]));
+/*
 #if MEMP_OVERFLOW_CHECK
         + MEMP_SANITY_REGION_AFTER_ALIGNED
 #endif
-));
+));*/
     }
   }
 #if MEMP_OVERFLOW_CHECK

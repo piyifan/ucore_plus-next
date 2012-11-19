@@ -274,9 +274,11 @@ memp_init(void)
   memp = LWIP_MEM_ALIGN(memp_memory);
   LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: create a linked list of memp elements for every pool\n") );
   /* for every pool: */
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: MEMP_MAX = %d\n", MEMP_MAX) );
   for (i = 0; i < MEMP_MAX; ++i) {
     memp_tab[i] = NULL;
     /* create a linked list of memp elements */
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: memp_num[i] = %d\n", memp_num[i]) );
     for (j = 0; j < memp_num[i]; ++j) {
       memp->next = memp_tab[i];
       memp_tab[i] = memp;

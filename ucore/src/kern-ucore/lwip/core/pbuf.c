@@ -285,6 +285,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
   LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: PBUF_RAM\n"));
     /* If pbuf is to be allocated in RAM, allocate memory for it. */
   LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: SIZEOF_STRUCT_PBUF = %d, offset = %d, length = %d\n", SIZEOF_STRUCT_PBUF, offset, length));
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: mem_malloc ( %d )\n", LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF + offset) + LWIP_MEM_ALIGN_SIZE(length)) );
     p = (struct pbuf*)mem_malloc(LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF + offset) + LWIP_MEM_ALIGN_SIZE(length));
     if (p == NULL) {
       return NULL;

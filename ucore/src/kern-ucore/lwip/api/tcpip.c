@@ -550,16 +550,19 @@ tcpip_netifapi_lock(struct netifapi_msg* netifapimsg)
 void
 tcpip_init(void (* initfunc)(void *), void *arg)
 {
+  LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip: lwip_init()\n"));
   lwip_init();
 
   tcpip_init_done = initfunc;
   tcpip_init_done_arg = arg;
 
+  LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip: sys_mbox_new()\n"));
   mbox = sys_mbox_new(TCPIP_MBOX_SIZE);
 #if LWIP_TCPIP_CORE_LOCKING
   lock_tcpip_core = sys_sem_new(1);
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
+  LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip: sys_thread_new()\n"));
   sys_thread_new(TCPIP_THREAD_NAME, tcpip_thread, NULL, TCPIP_THREAD_STACKSIZE, TCPIP_THREAD_PRIO);
 }
 

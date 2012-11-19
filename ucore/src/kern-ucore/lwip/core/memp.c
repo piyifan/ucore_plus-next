@@ -262,6 +262,7 @@ memp_init(void)
   struct memp *memp;
   u16_t i, j;
 
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: MEMP_STATS_AVAIL\n") );
   for (i = 0; i < MEMP_MAX; ++i) {
     MEMP_STATS_AVAIL(used, i, 0);
     MEMP_STATS_AVAIL(max, i, 0);
@@ -269,7 +270,9 @@ memp_init(void)
     MEMP_STATS_AVAIL(avail, i, memp_num[i]);
   }
 
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: LWIP_MEM_ALIGN\n") );
   memp = LWIP_MEM_ALIGN(memp_memory);
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: create a linked list of memp elements for every pool\n") );
   /* for every pool: */
   for (i = 0; i < MEMP_MAX; ++i) {
     memp_tab[i] = NULL;
@@ -285,8 +288,10 @@ memp_init(void)
     }
   }
 #if MEMP_OVERFLOW_CHECK
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: memp_overflow_init\n") );
   memp_overflow_init();
   /* check everything a first time to see if it worked */
+  LWIP_DEBUGF(MEMP_DEBUG , ("memp_init: memp_overflow_check_all\n") );
   memp_overflow_check_all();
 #endif /* MEMP_OVERFLOW_CHECK */
 }

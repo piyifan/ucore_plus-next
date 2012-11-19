@@ -41,6 +41,7 @@
 #define UDP_DEBUG           1
 #define TCP_DEBUG           1
 #define TCP_QLEN_DEBUG      1
+#define MEMP_DEBUG          1
 
 #define DBG_TYPES_ON 0xff
 

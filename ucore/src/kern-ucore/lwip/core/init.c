@@ -237,11 +237,29 @@ lwip_init(void)
   lwip_sanity_check();
 
   /* Modules initialization */
+#ifdef LWIP_DEBUG
+  kprintf("lwip_init: stats_init();\n");
+#endif
   stats_init();
+#ifdef LWIP_DEBUG
+  kprintf("lwip_init: sys_init();\n");
+#endif
   sys_init();
+#ifdef LWIP_DEBUG
+  kprintf("lwip_init: mem_init();\n");
+#endif
   mem_init();
+#ifdef LWIP_DEBUG
+  kprintf("lwip_init: memp_init();\n");
+#endif
   memp_init();
+#ifdef LWIP_DEBUG
+  kprintf("lwip_init: pbuf_init();\n");
+#endif
   pbuf_init();
+#ifdef LWIP_DEBUG
+  kprintf("lwip_init: netif_init();\n");
+#endif
   netif_init();
 
   kprintf("hfawefaw-------\n");

@@ -110,8 +110,8 @@ struct sys_timeouts *sys_arch_timeouts(void);
 sys_sem_t sys_sem_new(u8_t count);
 void sys_sem_signal(sys_sem_t sem);
 u32_t sys_arch_sem_wait(sys_sem_t sem, u32_t timeout);
-void sys_sem_free(sys_sem_t sem);
-void sys_sem_wait(sys_sem_t sem);
+//void sys_sem_free(sys_sem_t sem);
+//void sys_sem_wait(sys_sem_t sem);
 int sys_sem_wait_timeout(sys_sem_t sem, u32_t timeout);
 
 /* Time functions. */
@@ -132,7 +132,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t mbox, void **msg);
 #endif
 /* For now, we map straight to sys_arch implementation. */
 #define sys_mbox_tryfetch(mbox, msg) sys_arch_mbox_tryfetch(mbox, msg)
-void sys_mbox_free(sys_mbox_t mbox);
+//void sys_mbox_free(sys_mbox_t mbox);
 void sys_mbox_fetch(sys_mbox_t mbox, void **msg);
 
 /* Thread functions. */

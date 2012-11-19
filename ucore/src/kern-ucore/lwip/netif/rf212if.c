@@ -45,7 +45,7 @@
 
 #include "lwip/opt.h"
 
-#if 0 /* don't build, this is only a skeleton, see previous comment */
+#if 1 /* don't build, this is only a skeleton, see previous comment */
 
 #include "lwip/def.h"
 #include "lwip/mem.h"
@@ -69,6 +69,8 @@
 struct ethernetif {
   struct eth_addr *ethaddr;
   /* Add whatever per-interface state that is needed here. */
+  int (*send)(uint8_t len, uint8_t* data);
+  int (*recv)(uint8_t len, uint8_t* data);
 };
 
 /* Forward declarations. */
@@ -90,12 +92,26 @@ low_level_init(struct netif *netif)
   netif->hwaddr_len = ETHARP_HWADDR_LEN;
 
   /* set MAC hardware address */
-  netif->hwaddr[0] = ;
-  ...
-  netif->hwaddr[5] = ;
+/*
+  netif->hwaddr[0] = 0x52;
+  netif->hwaddr[1] = 0x54;
+  netif->hwaddr[2] = 0x00;
+  netif->hwaddr[3] = 0x12;
+  netif->hwaddr[4] = 0x34;
+  netif->hwaddr[5] = 0x56;
+
+    kprintf("   MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            netif->hwaddr[0],
+            netif->hwaddr[1],
+            netif->hwaddr[2],
+            netif->hwaddr[3],
+            netif->hwaddr[4],
+            netif->hwaddr[5]);
+*/
+
 
   /* maximum transfer unit */
-  netif->mtu = 1500;
+//  netif->mtu = 125;
   
   /* device capabilities */
   /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
@@ -125,9 +141,12 @@ low_level_output(struct netif *netif, struct pbuf *p)
 {
   struct ethernetif *ethernetif = netif->state;
   struct pbuf *q;
-
-  initiate transfer();
-  
+  int totlen = 0;
+  unsigned char data[200];
+//  initiate transfer();
+  if( !ethernetif->send ) {
+    return -15; // TODO: add err_t not define send
+  }
 #if ETH_PAD_SIZE
   pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
@@ -136,16 +155,24 @@ low_level_output(struct netif *netif, struct pbuf *p)
     /* Send the data from the pbuf to the interface, one pbuf at a
        time. The size of the data in each pbuf is kept in the ->len
        variable. */
-    send data from(q->payload, q->len);
+//    send data from(q->payload, q->len);
+    memcpy( data+totlen, q->payload, q->len);
+    totlen += q->len;
   }
 
-  signal that packet should be sent();
+//    signal that packet should be sent();
 
 #if ETH_PAD_SIZE
   pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
 #endif
   
   LINK_STATS_INC(link.xmit);
+
+/*
+ifdef LINK_STATS
+  lwip_stats.link.xmit++;
+#endif
+*/ /* LINK_STATS */
 
   return ERR_OK;
 }
@@ -164,10 +191,22 @@ low_level_input(struct netif *netif)
   struct ethernetif *ethernetif = netif->state;
   struct pbuf *p, *q;
   u16_t len;
+  unsigned char data[200];
+  u16_t curpos = 0;
+  u16_t left;
 
   /* Obtain the size of the packet and put it into the "len"
      variable. */
-  len = ;
+  kprintf("lwip :: low_level_input\n");
+  len = ethernetif->recv( sizeof(data), data );
+  kprintf(" read %d bytes\n", len);
+  for( left = 0; left < len; left ++ )
+  {
+    kprintf("%02x ", data[left]);
+    if ((left + 1) % 16 == 0)
+      kprintf("\n");
+  }
+  kprintf("\n");
 
 #if ETH_PAD_SIZE
   len += ETH_PAD_SIZE; /* allow room for Ethernet padding */
@@ -193,9 +232,15 @@ low_level_input(struct netif *netif)
        * actually received size. In this case, ensure the tot_len member of the
        * pbuf is the sum of the chained pbuf len members.
        */
-      read data into(q->payload, q->len);
+//      read data into(q->payload, q->len);
+      if (q->len > len - curpos)
+        left = len - curpos;
+      else
+        left = q->len;
+      memcpy(q->payload, data + curpos, left);
+      curpos += left;
     }
-    acknowledge that packet has been read();
+//    acknowledge that packet has been read();
 
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -203,9 +248,10 @@ low_level_input(struct netif *netif)
 
     LINK_STATS_INC(link.recv);
   } else {
-    drop packet();
+//    drop packet();
     LINK_STATS_INC(link.memerr);
     LINK_STATS_INC(link.drop);
+    kprintf("low_level_input: no mem\n");
   }
 
   return p;  

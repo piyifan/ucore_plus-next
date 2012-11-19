@@ -282,6 +282,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
 
     break;
   case PBUF_RAM:
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: PBUF_RAM\n"));
     /* If pbuf is to be allocated in RAM, allocate memory for it. */
     p = (struct pbuf*)mem_malloc(LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF + offset) + LWIP_MEM_ALIGN_SIZE(length));
     if (p == NULL) {
@@ -298,8 +299,10 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
     break;
   /* pbuf references existing (non-volatile static constant) ROM payload? */
   case PBUF_ROM:
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: PBUF_ROM\n"));
   /* pbuf references existing (externally allocated) RAM payload? */
   case PBUF_REF:
+  LWIP_DEBUGF(PBUF_DEBUG, ("pbuf_alloc: PBUF_REF\n"));
     /* only allocate memory for the pbuf structure */
     p = memp_malloc(MEMP_PBUF);
     if (p == NULL) {

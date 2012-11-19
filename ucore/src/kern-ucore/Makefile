@@ -6,4 +6,4 @@ dirs-y := schedule syscall fs process mm libs glue-ucore sync lwip
 
 dirs-y += arch/$(ARCH)
 
-dirs-$(UCONFIG_HAVE_LINUX_DDE_BASE) += module
+#dirs-$(UCONFIG_HAVE_LINUX_DDE_BASE) += module

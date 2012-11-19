@@ -37,7 +37,7 @@
  * something that better describes your network interface.
  */
 
-#if 0
+#if 1
 
 #include <lwip/opt.h>
 #include <lwip/def.h>

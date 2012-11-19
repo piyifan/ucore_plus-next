@@ -2,6 +2,16 @@
 #include <arch.h>
 #include <picirq.h>
 
+// U11:
+irq_handler_t irq_handler[IRQ_MAX];
+
+void
+reg_irq_handler(int irq_num, irq_handler_t handler)
+{
+    irq_handler[irq_num] = handler;
+}
+
+
 // I/O Addresses of the two programmable interrupt controllers
 #define IO_PIC1             0x20    // Master (IRQs 0-7)
 #define IO_PIC2             0xA0    // Slave (IRQs 8-15)

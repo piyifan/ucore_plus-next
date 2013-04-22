@@ -57,7 +57,6 @@ __trapret:
     movq %rax, %ds
     popq %rax
     movq %rax, %es
-
     popq %r15
     popq %r14
     popq %r13

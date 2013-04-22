@@ -333,6 +333,31 @@ static uint64_t sys_halt(uint64_t arg[])
 	panic("halt returned");
 }
 
+static uint64_t sys_prctl(uint64_t arg[]) {	
+	int code = (int)arg[0];
+	uint64_t ptr = arg[1];
+	return do_prctl(code, ptr);
+}
+
+static uint64_t
+sys_getpcstime(uint64_t arg[]) {
+	uint64_t* sec = (uint64_t*) arg[0];
+	uint32_t* usec = (uint32_t*) arg[1];
+	if (sec && !user_mem_check(current->mm, (uintptr_t) sec, sizeof(uint64_t), 1)) {
+		return -E_INVAL;
+	}
+	if (usec && !user_mem_check(current->mm, (uintptr_t) usec, sizeof(uint32_t), 1)) {
+		return -E_INVAL;
+	}
+	if (sec) {
+		*sec = ticks / 100;
+	}
+	if (usec) {
+		*usec = (ticks % 100) * 10000;
+	}
+	return 0;
+}
+
 static uint64_t(*syscalls[]) (uint64_t arg[]) = {
 [SYS_exit] sys_exit,
 	    [SYS_fork] sys_fork,
@@ -378,7 +403,11 @@ static uint64_t(*syscalls[]) (uint64_t arg[]) = {
 	    [SYS_unlink] sys_unlink,
 	    [SYS_getdirentry] sys_getdirentry,
 	    [SYS_dup] sys_dup,[SYS_pipe] sys_pipe,[SYS_mkfifo] sys_mkfifo,
-            [SYS_halt] sys_halt,};
+            [SYS_halt] sys_halt,
+            //Add for go
+            [SYS_prctl] sys_prctl,
+            [SYS_getpcstime] sys_getpcstime,
+};
 
 #define NUM_SYSCALLS        ((sizeof(syscalls)) / (sizeof(syscalls[0])))
 

@@ -63,8 +63,9 @@
 #define SYS_linux_sigsuspend   148
 
 /* changlan */
-#define SYS_init_module     150
-#define SYS_cleanup_module  151
+//Change!!!
+#define SYS_init_module     155 
+#define SYS_cleanup_module  156
 #define SYS_list_module     152
 #define SYS_mount           153
 #define SYS_umount			154
@@ -74,6 +75,10 @@
 
 /* chy: halt system*/
 #define SYS_halt            201
+
+/* piyifan prctl for TLS */
+#define SYS_prctl           150
+#define SYS_getpcstime      151
 
 /* SYS_fork flags */
 #define CLONE_VM             0x00000100

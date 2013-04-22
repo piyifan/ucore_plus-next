@@ -20,7 +20,15 @@ struct context {
 	uint64_t r13;
 	uint64_t r14;
 	uint64_t r15;
+
+        //Saved FS/GS for TLS
+	uint64_t fs;
+	uint64_t gs;
 };
+
+//Parameters for do_prctl
+#define PR_SET_FS 1
+#define PR_SET_GS 2
 
 /* The architecture-dependent part of the PCB */
 struct arch_proc_struct {

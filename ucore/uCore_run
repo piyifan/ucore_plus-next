@@ -93,7 +93,7 @@ case $UCONFIG_ARCH in
         if [[ $TEST_MODE = y ]]; then
             EXTRA_OPT="-S -display none -gdb tcp::$GDB_PORT"
         else
-            EXTRA_OPT="-monitor stdio"
+            EXTRA_OPT="-parallel stdio"
         fi
         exec $QEMU -m 512 \
             -hda $BUILD_DIR/kernel.img$TEST_POSTFIX \

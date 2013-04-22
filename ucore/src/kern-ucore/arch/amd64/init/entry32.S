@@ -65,7 +65,8 @@ loop:
     jne loop
 
     # Prepare for long-mode, set (CR4_PGE | CR4_PAE)
-    movl $0x20, %eax
+    # Disable SSE operation by setting the 9-th bit of CR4 to 1
+    movl $0x220, %eax
     movl %eax, %cr4
 
     # set cr3

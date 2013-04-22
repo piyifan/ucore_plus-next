@@ -174,18 +174,18 @@ void proc_run(struct proc_struct *proc)
 	if (proc != current) {
 		bool intr_flag;
 		struct proc_struct *prev = current, *next = proc;
-		// kprintf("(%d) => %d\n", lapic_id, next->pid);
 		local_intr_save(intr_flag);
 		{
 			current = proc;
 			load_rsp0(next->kstack + KSTACKSIZE);
 			mp_set_mm_pagetable(next->mm);
 
-#ifdef UCONFIG_BIONIC_LIBC
+			switch_to(&(prev->context), &(next->context));
+//#ifdef UCONFIG_BIONIC_LIBC
 			// for tls switch
 			tls_switch(next);
-#endif //UCONFIG_BIONIC_LIBC
-			switch_to(&(prev->context), &(next->context));
+//#endif //UCONFIG_BIONIC_LIBC
+
 		}
 		local_intr_restore(intr_flag);
 	}

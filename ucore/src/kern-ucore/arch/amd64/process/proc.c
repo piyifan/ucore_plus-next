@@ -5,9 +5,61 @@
 #include <types.h>
 #include <stdlib.h>
 #include <mp.h>
+#include <error.h>
 
 void forkret(void);
 void forkrets(struct trapframe *tf);
+
+//Switch TLS
+//Set FS and GS in amd64
+void tls_switch(struct proc_struct *proc)
+{
+     uint32_t fs_low32 = proc->context.fs & 0xFFFFFFFF;
+     uint32_t fs_high32 = (proc->context.fs >> 32) & 0xFFFFFFFF;
+     uint32_t gs_low32 = proc->context.gs & 0xFFFFFFFF;
+     uint32_t gs_high32 = (proc->context.gs >> 32) & 0xFFFFFFFF;
+     asm volatile (
+		"wrmsr;"
+		:: 
+		"a" (fs_low32), 
+		"d" (fs_high32), 
+		"c" (MSR_FS_BASE)
+	);
+     asm volatile (
+		"wrmsr;"
+		:: 
+		"a" (gs_low32), 
+		"d" (gs_high32), 
+		"c" (MSR_GS_KERNBASE)
+	);
+}
+
+/**
+ * Set fs/gs base;
+ * @code: SET_FS/SET_GS;
+ * @addr: The 64-bit base to be set;
+ */
+int
+do_prctl(int code, uintptr_t addr) {
+	// Set fs & gs contents in current;
+	uint64_t* reg;
+	switch (code) {
+		case PR_SET_FS:
+			current->context.fs = (uint64_t)addr;
+			break;
+		case PR_SET_GS:
+			current->context.gs = (uint64_t)addr;
+			break;
+		default:
+			return -E_INVAL;
+	}
+	// In case current not scheduled, change cpu's gdt now;
+	tls_switch(current);
+	//current->tf->tf_fs = USER_TLS1;
+	//current->tf->tf_gs = USER_TLS2;
+	
+	return 0;
+}
 
 // alloc_proc - create a proc struct and init fields
 struct proc_struct *alloc_proc(void)

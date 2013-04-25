@@ -342,19 +342,21 @@ static uint64_t sys_prctl(uint64_t arg[]) {
 static uint64_t
 sys_getpcstime(uint64_t arg[]) {
 	uint64_t* sec = (uint64_t*) arg[0];
-	uint32_t* usec = (uint32_t*) arg[1];
+	uint64_t* usec = (uint64_t*) arg[1];
 	if (sec && !user_mem_check(current->mm, (uintptr_t) sec, sizeof(uint64_t), 1)) {
 		return -E_INVAL;
 	}
-	if (usec && !user_mem_check(current->mm, (uintptr_t) usec, sizeof(uint32_t), 1)) {
+	if (usec && !user_mem_check(current->mm, (uintptr_t) usec, sizeof(uint64_t), 1)) {
+                //kprintf("ERROR!\n");
 		return -E_INVAL;
 	}
 	if (sec) {
 		*sec = ticks / 100;
 	}
 	if (usec) {
-		*usec = (ticks % 100) * 10000;
+		*usec = (((uint64_t)ticks) % 100) * 10000 * 1000;
 	}
+        //kprintf("Get time\n");
 	return 0;
 }
 

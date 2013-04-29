@@ -180,10 +180,11 @@ void proc_run(struct proc_struct *proc)
 			load_rsp0(next->kstack + KSTACKSIZE);
 			mp_set_mm_pagetable(next->mm);
 
+			tls_switch(next);
+
 			switch_to(&(prev->context), &(next->context));
 //#ifdef UCONFIG_BIONIC_LIBC
 			// for tls switch
-			tls_switch(next);
 //#endif //UCONFIG_BIONIC_LIBC
 
 		}

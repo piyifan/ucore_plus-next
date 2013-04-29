@@ -7,10 +7,10 @@ export TARGET_CC_FLAGS_COMMON	?=	-ffreestanding \
 									-mno-sse3 -mno-3dnow \
 									-fno-builtin -fno-builtin-function -nostdinc
 export TARGET_CC_FLAGS_BL		?=	-m32
-export TARGET_CC_FLAGS_KERNEL	?=	-m64 -mcmodel=kernel
+export TARGET_CC_FLAGS_KERNEL	?=	-m64 -mcmodel=kernel -g
 export TARGET_CC_FLAGS_SV		?=	-m64 -mcmodel=large
 export TARGET_CC_FLAGS_USER		?=	-m64 -mcmodel=small
-export TARGET_LD_FLAGS			?=	-m $(shell ld -V | grep elf_i386 2>/dev/null) -nostdlib
+export TARGET_LD_FLAGS			?=	-m $(shell ld -V | grep elf_i386 2>/dev/null) -nostdlib -g
 
 qemu: all
 	${QEMU} -smp 4 -m 512 \

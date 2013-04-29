@@ -1,5 +1,5 @@
 #include <memlayout.h>
-
+#include <msrbits.h>
 # vectors.S sends all traps here.
 .text
 .globl __alltraps
@@ -22,14 +22,30 @@ __alltraps:
     pushq %r14
     pushq %r15
 
-    # push ds, es
+    # push fs, gs, ds, es
+    #movl $MSR_GS_BASE, %ecx
+    #rdmsr
+    #shl $32, %rdx
+    #movl %eax, %eax
+    #addq %rdx, %rax
+    #pushq %rax
+    pushq $0
+    
+    #movl $MSR_FS_BASE, %ecx
+    #rdmsr
+    #shl $32, %rdx
+    #movl %eax, %eax
+    #addq %rdx, %rax
+    #pushq %rax   
+    pushq $0
+
     movw %es, %rax
     pushq %rax
     movw %ds, %rax
     pushq %rax
 
     # swap in kernel GS BASE if we come from user space
-    cmpw $USER_CS, 0xA0(%rsp)
+    cmpw $USER_CS, 0xB0(%rsp)
     jnz 1f
     swapgs
 
@@ -44,9 +60,20 @@ __alltraps:
 .globl __trapret
 __trapret:
 
-    # restore GS BASE if we'll back to userspace
-    cmpw $USER_CS, 0xA0(%rsp)
+    # restore FS/GS BASE if we'll back to userspace
+    cmpw $USER_CS, 0xB0(%rsp)
     jnz 1f
+
+   # movl $MSR_FS_BASE, %ecx
+   # movl 16(%rsp), %edx
+   # movl 20(%rsp), %eax
+   # wrmsr
+
+   # movl $MSR_GS_KERNBASE, %ecx
+   # movl 24(%rsp), %eax
+   # movl 28(%rsp), %edx
+   # wrmsr
+
     swapgs
 
 1:
@@ -57,6 +84,11 @@ __trapret:
     movq %rax, %ds
     popq %rax
     movq %rax, %es
+
+    //Two positions for fs/gs
+    popq %rax
+    popq %rax
+    
     popq %r15
     popq %r14
     popq %r13

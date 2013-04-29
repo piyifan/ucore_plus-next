@@ -18,6 +18,10 @@ void tls_switch(struct proc_struct *proc)
      uint32_t fs_high32 = (proc->context.fs >> 32) & 0xFFFFFFFF;
      uint32_t gs_low32 = proc->context.gs & 0xFFFFFFFF;
      uint32_t gs_high32 = (proc->context.gs >> 32) & 0xFFFFFFFF;
+     /*if (proc->tf != NULL) {
+        proc->tf->tf_fs =  proc->context.fs;
+        proc->tf->tf_gs =  proc->context.gs;
+     }*/
      asm volatile (
 		"wrmsr;"
 		:: 
@@ -42,21 +46,20 @@ void tls_switch(struct proc_struct *proc)
 int
 do_prctl(int code, uintptr_t addr) {
 	// Set fs & gs contents in current;
-	uint64_t* reg;
 	switch (code) {
 		case PR_SET_FS:
 			current->context.fs = (uint64_t)addr;
+                        //current->tf->tf_fs = (uint64_t)addr;
 			break;
 		case PR_SET_GS:
 			current->context.gs = (uint64_t)addr;
+                        //current->tf->tf_gs = (uint64_t)addr;
 			break;
 		default:
 			return -E_INVAL;
 	}
 	// In case current not scheduled, change cpu's gdt now;
 	tls_switch(current);
-	//current->tf->tf_fs = USER_TLS1;
-	//current->tf->tf_gs = USER_TLS2;
 	
 	return 0;
 }

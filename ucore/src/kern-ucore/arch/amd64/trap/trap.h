@@ -67,6 +67,8 @@ struct trapframe {
 	uint16_t tf_padding0[3];
 	uint16_t tf_es;
 	uint16_t tf_padding1[3];
+        uint64_t tf_fs;
+        uint64_t tf_gs;
 	struct pushregs tf_regs;
 	uint64_t tf_trapno;
 	/* below here defined by x86 hardware */

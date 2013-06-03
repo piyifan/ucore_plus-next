@@ -177,17 +177,17 @@ static void trap_dispatch(struct trapframe *tf)
 	switch (tf->tf_trapno) {
 	case T_PGFLT:
 		if ((ret = pgfault_handler(tf)) != 0) {
-			print_trapframe(tf);
 			if (current == NULL) {
+                                print_trapframe(tf);
 				panic("handle pgfault failed. %e\n", ret);
 			} else {
 				if (trap_in_kernel(tf)) {
+					print_trapframe(tf);
 					panic
 					    ("handle pgfault failed in kernel mode. %e\n",
 					     ret);
 				}
-				kprintf("killed by kernel.\n");
-				do_exit(-E_KILLED);
+				do_sigtkill(current->pid, SIGSEGV);				
 			}
 		}
 		break;
@@ -251,6 +251,7 @@ void trap(struct trapframe *tf)
 			if (current->need_resched) {
 				schedule();
 			}
+			do_signal(tf, NULL);
 		} else if (current == idleproc) {
 			schedule();
 		}

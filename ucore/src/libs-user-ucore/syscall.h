@@ -2,6 +2,8 @@
 #define __USER_LIBS_SYSCALL_H__
 
 #include <types.h>
+#include <signum.h>
+
 #ifndef __user
 #define __user
 #endif
@@ -80,4 +82,11 @@ int sys_rf212_reg(uint8_t reg, uint8_t value);
 int sys_rf212_reset();
 //halt the system
 int sys_halt();
+
+int sys_linux_sigaction(int sign, const struct sigaction *act, struct sigaction *old);
+int sys_linux_sigprocmask(int how, const sigset_t *set, sigset_t *old);
+int sys_linux_tkill(int pid, int sign);
+int sys_linux_kill(int pid, int sign);
+int sys_linux_sigsuspend(int unused1, int unused2, uint32_t mask);
+
 #endif /* !__USER_LIBS_SYSCALL_H__ */

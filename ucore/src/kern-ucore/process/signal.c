@@ -8,12 +8,12 @@
 #include <sched.h>
 #include <kio.h>
 #include <mp.h>
-
+#include <stdio.h>
 //#define SIGQUEUE
 
 #define get_si(x) (&((x)->signal_info))
 
-//#define __SIGDEBUG
+#define __SIGDEBUG
 
 void lock_sig(struct sighand_struct *sh)
 {
@@ -181,7 +181,8 @@ int do_sigaction(int sign, const struct sigaction *act, struct sigaction *old)
 {
 	assert(get_si(current)->sighand);
 #ifdef __SIGDEBUG
-	kprintf("do_sigaction(): sign = %d, pid = %d\n", sign, current->pid);
+	kprintf("do_sigaction(): sign = %d, pid = %d act = %llx old = %llx\n", 
+			sign, current->pid, act, old);
 #endif
 	struct sigaction *k = &(get_si(current)->sighand->action[sign - 1]);
 
@@ -196,13 +197,15 @@ int do_sigaction(int sign, const struct sigaction *act, struct sigaction *old)
 		ret = -E_INVAL;
 		goto out;
 	}
-	if (act == NULL
-	    || !copy_from_user(mm, k, act, sizeof(struct sigaction), 1)) {
+	if (act != NULL
+	    && !copy_from_user(mm, k, act, sizeof(struct sigaction), 1)) {
 		unlock_mm(mm);
 		ret = -E_INVAL;
 		goto out;
 	}
 	unlock_mm(mm);
+        if (act == NULL)
+            goto out;
 	lock_sig(get_si(current)->sighand);
 	sigset_del(k->sa_mask, SIGKILL);
 	sigset_del(k->sa_mask, SIGSTOP);
@@ -337,7 +340,7 @@ send_signal(int sign, struct siginfo_t *info, struct proc_struct *to,
 	if (q == NULL) {
 		goto still_do_it;
 	}
-	q->sem = &(to->sighand->sig_sem);
+	q->sem = &(get_si(to)->sighand->sig_sem);
 	q->flags = 0;
 	list_add_before(&(pending->list), &(q->list));
 	if ((int)info == 0) {
@@ -357,7 +360,7 @@ send_signal(int sign, struct siginfo_t *info, struct proc_struct *to,
 #ifdef SIGQUEUE
 still_do_it:
 	if (sign >= 32 && info && (int)info != 1 && info->si_code != SI_USER) {
-		return -EAGAIN;
+		return -E_INVAL;
 	}
 	sigset_add(pending->signal, sign);
 	return 0;

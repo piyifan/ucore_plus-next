@@ -339,8 +339,7 @@ static uint64_t sys_prctl(uint64_t arg[]) {
 	return do_prctl(code, ptr);
 }
 
-static uint64_t
-sys_getpcstime(uint64_t arg[]) {
+static uint64_t sys_getpcstime(uint64_t arg[]) {
 	uint64_t* sec = (uint64_t*) arg[0];
 	uint64_t* usec = (uint64_t*) arg[1];
 	if (sec && !user_mem_check(current->mm, (uintptr_t) sec, sizeof(uint64_t), 1)) {
@@ -359,6 +358,64 @@ sys_getpcstime(uint64_t arg[]) {
         //kprintf("Get time\n");
 	return 0;
 }
+
+//===========   Syscall about signal ===============
+
+static uint64_t sys_linux_sigaction(uint64_t arg[])
+{
+	return do_sigaction((int)arg[0], (const struct sigaction *)arg[1],
+			    (struct sigaction *)arg[2]);
+}
+
+static uint64_t sys_linux_sigprocmask(uint64_t arg[])
+{
+	return do_sigprocmask((int)arg[0], (const sigset_t *)arg[1],
+			      (sigset_t *) arg[2]);
+}
+
+static uint64_t sys_linux_sigpending(uint64_t arg[])
+{
+	return do_sigpending((sigset_t *) arg[0]);
+}
+
+static uint64_t sys_linux_sigtkill(uint64_t arg[])
+{
+	return do_sigtkill((int)arg[0], (int)arg[1]);
+}
+
+static uint64_t sys_linux_sigsuspend(uint64_t arg[])
+{
+	return do_sigsuspend((sigset_t *) arg[0]);
+}
+
+static uint64_t sys_linux_sigkill(uint64_t arg[])
+{
+	return do_sigkill((int)arg[0], (int)arg[1]);
+}
+
+static uint64_t sys_linux_sigaltstack(uint64_t arg[])
+{
+	const stack_t *stack = (const stack_t *)arg[0];
+	stack_t *old = (stack_t *) arg[1];
+	return do_sigaltstack(stack, old);
+}
+
+
+static uint64_t sys_linux_sigwaitinfo(uint64_t arg[])
+{
+	const sigset_t *set = (const sigset_t *)arg[0];
+	struct siginfo_t *info = (struct siginfo_t *)arg[1];
+	return do_sigwaitinfo(set, info);
+}
+
+
+//this never used by user program
+static uint64_t sys_linux_sigreturn(uint64_t arg[])
+{
+	return do_sigreturn();
+}
+
+///////////////////////////////////////////
 
 static uint64_t(*syscalls[]) (uint64_t arg[]) = {
 [SYS_exit] sys_exit,
@@ -409,6 +466,13 @@ static uint64_t(*syscalls[]) (uint64_t arg[]) = {
             //Add for go
             [SYS_prctl] sys_prctl,
             [SYS_getpcstime] sys_getpcstime,
+            //Syscall about signal
+            [SYS_linux_sigaction] sys_linux_sigaction,
+            [SYS_linux_sigprocmask] sys_linux_sigprocmask,
+            [SYS_linux_tkill] sys_linux_sigtkill,
+            [SYS_linux_sigsuspend] sys_linux_sigsuspend,
+            [SYS_linux_kill] sys_linux_sigkill,
+            [SYS_linux_sigreturn] sys_linux_sigreturn,
 };
 
 #define NUM_SYSCALLS        ((sizeof(syscalls)) / (sizeof(syscalls[0])))

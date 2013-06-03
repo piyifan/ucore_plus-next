@@ -290,6 +290,29 @@ int sys_halt(void)
 #endif
 }
 
+//Syscall about signals
+
+int sys_linux_sigaction(int sign, const struct sigaction *act, struct sigaction *old) {
+	return syscall(SYS_linux_sigaction, sign, act, old);
+}
+
+int sys_linux_sigprocmask(int how, const sigset_t *set, sigset_t *old) {
+	return syscall(SYS_linux_sigprocmask, how, set, old);
+}
+
+int sys_linux_tkill(int pid, int sign) {
+	return syscall(SYS_linux_tkill, pid, sign);
+}
+
+int sys_linux_kill(int pid, int sign) {
+	return syscall(SYS_linux_kill, pid, sign);
+}
+
+int sys_linux_sigsuspend(int unused1, int unused2, uint32_t mask) {
+	return syscall(SYS_linux_sigsuspend, unused1, unused2, mask);
+}
+
+
 #else
 /* ARM use different syscall method */
 

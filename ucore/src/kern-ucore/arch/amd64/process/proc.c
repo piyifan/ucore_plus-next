@@ -64,6 +64,18 @@ do_prctl(int code, uintptr_t addr) {
 	return 0;
 }
 
+static void proc_signal_init(struct proc_signal *ps)
+{
+	sigset_initwith(ps->pending.signal, 0);
+	ps->signal = NULL;
+	ps->sighand = NULL;
+	sigset_initwith(ps->blocked, 0);
+	sigset_initwith(ps->rt_blocked, 0);
+	list_init(&(ps->pending.list));
+	ps->sas_ss_sp = 0;
+	ps->sas_ss_size = 0;
+}
+
 // alloc_proc - create a proc struct and init fields
 struct proc_struct *alloc_proc(void)
 {
@@ -90,6 +102,9 @@ struct proc_struct *alloc_proc(void)
 		proc->sem_queue = NULL;
 		event_box_init(&(proc->event_box));
 		proc->fs_struct = NULL;
+		proc->tid = -1;
+		proc->gid = -1;
+		proc_signal_init(&proc->signal_info);
 	}
 	return proc;
 }

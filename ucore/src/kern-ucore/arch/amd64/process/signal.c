@@ -7,7 +7,7 @@
 #include "signal.h"
 
 int __sig_setup_frame(int sign, struct sigaction *act, sigset_t oldset,
-		      struct trapframe *tf) {
+		      struct trapframe *tf, struct siginfo_t *info) {
         struct mm_struct *mm = current->mm;
         uintptr_t stack = current->signal_info.sas_ss_sp;
         if (stack == 0) {
@@ -22,7 +22,7 @@ int __sig_setup_frame(int sign, struct sigaction *act, sigset_t oldset,
         kframe->sign = sign;
         kframe->tf = *tf;
         kframe->old_blocked = oldset;
-
+	kframe->info = *info;
         // this magic number is code of "movl $149, %eax    int $0x80"
         // by setting the top of user stack a pointer to this,
         // the handler will call sigreturn syscall when is returns
@@ -47,7 +47,9 @@ int __sig_setup_frame(int sign, struct sigaction *act, sigset_t oldset,
         tf->tf_rsp = (uintptr_t)frame;
         tf->tf_rip = (uintptr_t)act->sa_handler;
         tf->tf_regs.reg_rdi = (uint64_t)sign;
-        tf->tf_regs.reg_rcx = tf->tf_regs.reg_rdx = 0;
+        tf->tf_regs.reg_rsi = (uintptr_t)(&frame->info);
+        tf->tf_regs.reg_rdx = (uintptr_t)(&frame->tf);
+        tf->tf_regs.reg_rax = 0;
 
         //we don't need to assign cs ds ss es...
         return 0;

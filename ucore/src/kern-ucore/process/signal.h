@@ -137,6 +137,6 @@ int do_signal(struct trapframe *tf, sigset_t * old);
 void sig_recalc_pending(struct proc_struct *proc);
 
 int __sig_setup_frame(int sign, struct sigaction *act, sigset_t oldset,
-		      struct trapframe *tf);
+		      struct trapframe *tf, struct siginfo_t *info);
 
 #endif // _HERN_PROCESS_SIGNAL_H_

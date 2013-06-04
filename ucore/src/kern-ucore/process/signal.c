@@ -9,7 +9,7 @@
 #include <kio.h>
 #include <mp.h>
 #include <stdio.h>
-//#define SIGQUEUE
+#define SIGQUEUE
 
 #define get_si(x) (&((x)->signal_info))
 
@@ -30,7 +30,8 @@ void unlock_sig(struct sighand_struct *sh)
 }
 
 // remove sign from the pending queue
-static void remove_from_queue(int sign, struct sigpending *queue)
+// save one of siginfo of the signal sign in info when info != NULL
+static void remove_from_queue(int sign, struct sigpending *queue, struct siginfo_t *info)
 {
 	if (!sigismember(queue->signal, sign))
 		return;
@@ -44,6 +45,8 @@ static void remove_from_queue(int sign, struct sigpending *queue)
 		if (sig->info.si_signo != sign) {
 			continue;
 		}
+                if (info != NULL)
+                    memcpy(info, &(sig->info), sizeof(struct siginfo_t));
 		list_del(le->prev);
 		kfree(sig);
 	}
@@ -63,7 +66,8 @@ void sig_recalc_pending(struct proc_struct *proc)
 }
 
 // return a signal every time, until empty then return 0
-static int dequeue_signal(struct proc_struct *proc)
+// Also save the siginfo to info
+static int dequeue_signal(struct proc_struct *proc, struct siginfo_t *info)
 {
 	int sign = 0;
 	if (get_si(proc)->pending.signal != 0) {
@@ -71,7 +75,7 @@ static int dequeue_signal(struct proc_struct *proc)
 			if (!sigismember(get_si(proc)->blocked, sign)
 			    && sigismember(get_si(proc)->pending.signal, sign)) {
 				remove_from_queue(sign,
-						  &(get_si(proc)->pending));
+						  &(get_si(proc)->pending), info);
 				sig_recalc_pending(proc);
 				return sign;
 			}
@@ -85,7 +89,7 @@ static int dequeue_signal(struct proc_struct *proc)
 					   shared_pending.signal, sign)) {
 				remove_from_queue(sign,
 						  &(get_si(proc)->
-						    signal->shared_pending));
+						    signal->shared_pending), info);
 				sig_recalc_pending(proc);
 				return sign;
 			}
@@ -212,10 +216,10 @@ int do_sigaction(int sign, const struct sigaction *act, struct sigaction *old)
 	if (ignore_sig(sign, current)) {
 		// i'm not very sure that if we should lock
 		remove_from_queue(sign,
-				  &(get_si(current)->signal->shared_pending));
+				  &(get_si(current)->signal->shared_pending), NULL);
 		struct proc_struct *proc = current;
 		do {
-			remove_from_queue(sign, &(get_si(proc)->pending));
+			remove_from_queue(sign, &(get_si(proc)->pending), NULL);
 			sig_recalc_pending(proc);
 			proc = next_thread(proc);
 		} while (proc != current);
@@ -411,28 +415,28 @@ static int handle_stop_signal(int sign, struct proc_struct *to)
 	if (sign == SIGSTOP || sign == SIGTSTP || sign == SIGTTIN
 	    || sign == SIGTTOU) {
 		remove_from_queue(SIGCONT,
-				  &(get_si(to)->signal->shared_pending));
+				  &(get_si(to)->signal->shared_pending), NULL);
 		struct proc_struct *proc = current;
 		do {
-			remove_from_queue(SIGCONT, &(get_si(proc)->pending));
+			remove_from_queue(SIGCONT, &(get_si(proc)->pending), NULL);
 			sig_recalc_pending(proc);
 			proc = next_thread(proc);
 		} while (proc != current);
 	} else if (sign == SIGCONT) {
 		remove_from_queue(SIGSTOP,
-				  &(get_si(to)->signal->shared_pending));
+				  &(get_si(to)->signal->shared_pending), NULL);
 		remove_from_queue(SIGTSTP,
-				  &(get_si(to)->signal->shared_pending));
+				  &(get_si(to)->signal->shared_pending), NULL);
 		remove_from_queue(SIGTTIN,
-				  &(get_si(to)->signal->shared_pending));
+				  &(get_si(to)->signal->shared_pending), NULL);
 		remove_from_queue(SIGTTOU,
-				  &(get_si(to)->signal->shared_pending));
+				  &(get_si(to)->signal->shared_pending), NULL);
 		struct proc_struct *proc = current;
 		do {
-			remove_from_queue(SIGCONT, &(get_si(proc)->pending));
-			remove_from_queue(SIGTSTP, &(get_si(proc)->pending));
-			remove_from_queue(SIGTTIN, &(get_si(proc)->pending));
-			remove_from_queue(SIGTTOU, &(get_si(proc)->pending));
+			remove_from_queue(SIGCONT, &(get_si(proc)->pending), NULL);
+			remove_from_queue(SIGTSTP, &(get_si(proc)->pending), NULL);
+			remove_from_queue(SIGTTIN, &(get_si(proc)->pending), NULL);
+			remove_from_queue(SIGTTOU, &(get_si(proc)->pending), NULL);
 			sig_recalc_pending(proc);
 			proc = next_thread(proc);
 		} while (proc != current);
@@ -508,9 +512,9 @@ out:
 // prepare block for signal handler
 static int
 handle_signal(int sign, struct sigaction *act, sigset_t oldset,
-	      struct trapframe *tf)
+	      struct trapframe *tf, struct siginfo_t* info)
 {
-	int ret = __sig_setup_frame(sign, act, oldset, tf);
+	int ret = __sig_setup_frame(sign, act, oldset, tf, info);
 
 	if (ret != 0) {
 		return ret;
@@ -557,7 +561,11 @@ int do_signal(struct trapframe *tf, sigset_t * old)
 		old = &get_si(current)->blocked;
 	}
 
-	while ((sign = dequeue_signal(current)) != 0) {
+	struct siginfo_t *info = (struct siginfo_t *) 
+					kmalloc(sizeof(struct siginfo_t));
+        if (info == NULL)
+		return -E_NO_MEM;
+	while ((sign = dequeue_signal(current, info)) != 0) {
 #ifdef __SIGDEBUG
 		kprintf("do_signal(): sign = %d, pid = %d\n", sign,
 			current->pid);
@@ -594,13 +602,15 @@ int do_signal(struct trapframe *tf, sigset_t * old)
 #ifdef __SIGDEBUG
 			kprintf("do_signal() call user %d\n", sign);
 #endif
-			handle_signal(sign, act, *old, tf);
+			handle_signal(sign, act, *old, tf, info);
 			if ((act->sa_flags & SA_ONESHOT) != 0) {
 				act->sa_handler = SIG_DFL;
 			}
+			kfree(info);
 			return sign;
 		}
 	}
+        kfree(info);
 	return sign;
 }
 
@@ -662,6 +672,7 @@ out:
 	return ret;
 }
 
+//TODO: Do not set info now.
 int do_sigwaitinfo(const sigset_t * setp, struct siginfo_t *info)
 {
 	sigset_t set;

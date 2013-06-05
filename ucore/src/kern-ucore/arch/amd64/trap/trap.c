@@ -212,6 +212,10 @@ static void trap_dispatch(struct trapframe *tf)
 	case IRQ_OFFSET + IRQ_IDE2:
 		/* do nothing */
 		break;
+        case T_DIVIDE:
+        case T_FPERR:
+               do_sigtkill(current->pid, SIGFPE);
+               break;
 	default:
 		print_trapframe(tf);
 		if (current != NULL) {

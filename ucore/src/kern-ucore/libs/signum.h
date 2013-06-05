@@ -78,6 +78,18 @@ enum {
 #define SI_KERNEL	SI_KERNEL
 };
 
+//si_code for SIGFPE
+enum {
+	FPE_INTDIV	= 0x1,
+	FPE_INTOVF	= 0x2,
+	FPE_FLTDIV	= 0x3,
+	FPE_FLTOVF	= 0x4,
+	FPE_FLTUND	= 0x5,
+	FPE_FLTRES	= 0x6,
+	FPE_FLTINV	= 0x7,
+	FPE_FLTSUB	= 0x8,
+};
+
 /* using uint64_t instead of uint32_t[2] */
 typedef uint64_t sigset_t;
 

@@ -212,10 +212,13 @@ static void trap_dispatch(struct trapframe *tf)
 	case IRQ_OFFSET + IRQ_IDE2:
 		/* do nothing */
 		break;
-        case T_DIVIDE:
+	//TODO: Inexact si_code for SIGFPE
+        case T_DIVIDE:		
+                do_sigfpe(current->pid, FPE_INTDIV);
+		break;
         case T_FPERR:
-               do_sigtkill(current->pid, SIGFPE);
-               break;
+               	do_sigfpe(current->pid, FPE_FLTOVF);
+		break;
 	default:
 		print_trapframe(tf);
 		if (current != NULL) {

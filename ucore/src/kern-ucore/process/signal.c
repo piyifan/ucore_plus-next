@@ -336,7 +336,7 @@ send_signal(int sign, struct siginfo_t *info, struct proc_struct *to,
 	    struct sigpending *pending)
 {
 #ifdef SIGQUEUE
-	if ((int)info == 2) {
+	if ((uint64_t)info == 2) {
 		goto still_do_it;
 	}
 	struct sigqueue *q =
@@ -347,11 +347,11 @@ send_signal(int sign, struct siginfo_t *info, struct proc_struct *to,
 	q->sem = &(get_si(to)->sighand->sig_sem);
 	q->flags = 0;
 	list_add_before(&(pending->list), &(q->list));
-	if ((int)info == 0) {
+	if ((uint64_t)info == 0) {
 		q->info.si_signo = sign;
 		q->info.si_errno = 0;
 		q->info.si_code = SI_USER;
-	} else if ((int)info == 1) {
+	} else if ((uint64_t)info == 1) {
 		q->info.si_signo = sign;
 		q->info.si_errno = 0;
 		q->info.si_code = SI_KERNEL;
@@ -363,7 +363,7 @@ send_signal(int sign, struct siginfo_t *info, struct proc_struct *to,
 	return 0;
 #ifdef SIGQUEUE
 still_do_it:
-	if (sign >= 32 && info && (int)info != 1 && info->si_code != SI_USER) {
+	if (sign >= 32 && info && (uint64_t)info != 1 && info->si_code != SI_USER) {
 		return -E_INVAL;
 	}
 	sigset_add(pending->signal, sign);
@@ -711,3 +711,17 @@ int do_sigwaitinfo(const sigset_t * setp, struct siginfo_t *info)
 		}
 	}
 }
+
+int do_sigfpe(int pid, int type)
+{
+	struct proc_struct *proc = find_proc(pid);
+	if (proc == NULL || proc->state == PROC_ZOMBIE) {
+		return -E_INVAL;
+	}
+        struct siginfo_t info;
+	info.si_signo = SIGFPE;
+	info.si_errno = 0;
+	info.si_code = type;
+        return specific_send_sig_info(SIGFPE, &info, proc);
+}
+
